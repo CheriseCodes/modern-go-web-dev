@@ -126,7 +126,41 @@ func (rs ResultsService) CreateResult(
 
 func (rs ResultsService) DeleteResult(
 	resultId string) *models.ResponseError {
-	// TODO
+	if resultId == "" {
+		return &models.ResponseError{
+			Message: "Invalid result id",
+			Status:  http.StatusBadRequest,
+		}
+	}
+	result, responseErr := rs.resultsRepository.DeleteResult(resultId)
+	if responseErr != nil {
+		return responseErr
+	}
+	runner, responseErr := rs.runnersRepository.GetRunner(result.RunnerID)
+	if responseErr != nil {
+		return responseErr
+	}
+	// if deleted result is the personal best, set new personal best
+	if runner.PersonalBest == result.RaceResult {
+		personalBest, responseErr := rs.resultsRepository.GetPersonalBestResults(result.RunnerID)
+		if responseErr != nil {
+			return responseErr
+		}
+		runner.PersonalBest = personalBest
+	}
+	// if deleted result is the season best, set new season best
+	currentYear := time.Now().Year()
+	if runner.SeasonBest == result.RaceResult && result.Year == currentYear {
+		seasonBest, responseErr := rs.resultsRepository.GetSeasonBestResults(result.RunnerID, result.Year)
+		if responseErr != nil {
+			return responseErr
+		}
+		runner.SeasonBest = seasonBest
+	}
+	responseErr = rs.runnersRepository.UpdateRunnerResults(runner)
+	if responseErr != nil {
+		return responseErr
+	}
 	return nil
 }
 
