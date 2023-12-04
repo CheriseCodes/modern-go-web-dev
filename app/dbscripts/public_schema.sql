@@ -19,5 +19,24 @@ CREATE TABLE runners (
     country text NOT NULL,
     personal_best interval,
     season_best interval,
-    COUNSTRAINT runners_pk PRIMARY KEY (id)
-)
+    CONSTRAINT runners_pk PRIMARY KEY (id)
+);
+
+CREATE INDEX runners_country
+ON runners (country);
+CREATE INDEX runners_season_best
+ON runners (season_best);
+-- results (running competition)
+CREATE TABLE results (
+	id uuid NOT NULL DEFAULT uuid_generate_v1mc(),
+	runner_id uuid NOT NULL,
+	race_result interval NOT NULL,
+	location text NOT NULL,
+	position integer,
+	year integer NOT NULL,
+	CONSTRAINT results_pk PRIMARY KEY (id),
+	CONSTRAINT fk_results_runner_id FOREIGN KEY (runner_id)
+        REFERENCES runners (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
