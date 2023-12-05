@@ -3,7 +3,6 @@ package server
 import (
 	"database/sql"
 	"log"
-	// "log"
 	"runners-postgresql/controllers"
 	"runners-postgresql/repositories"
 	"runners-postgresql/services"
@@ -20,7 +19,7 @@ type HttpServer struct {
 }
 
 func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
-	runnersRepository := repositories.NewRunnerRepository(dbHandler)
+	runnersRepository := repositories.NewRunnersRepository(dbHandler)
 	resultRepository := repositories.NewResultsRepository(dbHandler)
 	runnersService := services.NewRunnersService(runnersRepository, resultRepository)
 	resultsService := services.NewResultsService(resultRepository, runnersRepository)
@@ -41,7 +40,7 @@ func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
 
 func (hs HttpServer) Start() {
 	err := hs.router.Run(hs.config.GetString(
-		"http.server_address"
+		"http.server_address",
 	))
 	if err != nil {
 		log.Fatalf("Error while starting HTTP server: %v", err)

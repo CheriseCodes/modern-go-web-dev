@@ -84,19 +84,17 @@ func (rr ResultsRepository) DeleteResult(resultId string) (*models.Result, *mode
 	if rows.Err() != nil {
 		return nil, &models.ResponseError{
 			Message: err.Error(),
-			Status: http.StatusInternalServerError
+			Status:  http.StatusInternalServerError,
 		}
 	}
 	return &models.Result{
-		ID: resultId,
-		RunnerID: runnerId,
+		ID:         resultId,
+		RunnerID:   runnerId,
 		RaceResult: raceResult,
-		Year: year,
+		Year:       year,
 	}, nil
 }
-func (rr ResultsRepository) GetAllRunnersResult(
-	runnerId strin
-) ([]*models.Result, *models.ResponseError) {
+func (rr ResultsRepository) GetAllRunnersResults(runnerId string) ([]*models.Result, *models.ResponseError) {
 	query := `
 		SELECT id, race_result, location, position, year
 		FROM results
@@ -104,9 +102,9 @@ func (rr ResultsRepository) GetAllRunnersResult(
 	`
 	rows, err := rr.dbHandler.Query(query, runnerId)
 	if err != nil {
-		return nil, &models.ResonseError{
+		return nil, &models.ResponseError{
 			Message: err.Error(),
-			Status: http.StatusInternalServerError,
+			Status:  http.StatusInternalServerError,
 		}
 	}
 	defer rows.Close()
@@ -118,23 +116,23 @@ func (rr ResultsRepository) GetAllRunnersResult(
 		if err != nil {
 			return nil, &models.ResponseError{
 				Message: err.Error(),
-				Status: http.StatusInternalServerError,
+				Status:  http.StatusInternalServerError,
 			}
 		}
 		result := &models.Result{
-			ID: id,
-			RunnerID: runnerId,
+			ID:         id,
+			RunnerID:   runnerId,
 			RaceResult: raceResult,
-			Location: location,
-			Position: position,
-			Year: year,
+			Location:   location,
+			Position:   position,
+			Year:       year,
 		}
 		results = append(results, result)
 	}
 	if rows.Err() != nil {
-		return nil, &models.ResonseError{
+		return nil, &models.ResponseError{
 			Message: err.Error(),
-			Status: http.StatusInternalServerError,
+			Status:  http.StatusInternalServerError,
 		}
 	}
 	return results, nil
@@ -149,7 +147,7 @@ func (rr ResultsRepository) GetSeasonBestResults(runnerId string, year int) (str
 	if err != nil {
 		return "", &models.ResponseError{
 			Message: err.Error(),
-			Status: http.StatusInternalServerError,
+			Status:  http.StatusInternalServerError,
 		}
 	}
 	defer rows.Close()
@@ -157,16 +155,49 @@ func (rr ResultsRepository) GetSeasonBestResults(runnerId string, year int) (str
 	for rows.Next() {
 		err := rows.Scan(&raceResult)
 		if err != nil {
-			return "", &models.ResonseError{
+			return "", &models.ResponseError{
 				Message: err.Error(),
-				Status: http.StatusInternalServerError
+				Status:  http.StatusInternalServerError,
 			}
 		}
 	}
 	if rows.Err() != nil {
-		return "", &models.ResonseError{
+		return "", &models.ResponseError{
 			Message: err.Error(),
-			Status: http.StatusInternalServerError
+			Status:  http.StatusInternalServerError,
+		}
+	}
+	return raceResult, nil
+}
+
+func (rr ResultsRepository) GetPersonalBestResults(runnerId string) (string, *models.ResponseError) {
+	query := `
+		SELECT MIN(race_result)
+		FROM results
+		WHERE runner_id = $1
+	`
+	rows, err := rr.dbHandler.Query(query, runnerId)
+	if err != nil {
+		return "", &models.ResponseError{
+			Message: err.Error(),
+			Status:  http.StatusInternalServerError,
+		}
+	}
+	defer rows.Close()
+	var raceResult string
+	for rows.Next() {
+		err := rows.Scan(&raceResult)
+		if err != nil {
+			return "", &models.ResponseError{
+				Message: err.Error(),
+				Status:  http.StatusInternalServerError,
+			}
+		}
+	}
+	if rows.Err() != nil {
+		return "", &models.ResponseError{
+			Message: err.Error(),
+			Status:  http.StatusInternalServerError,
 		}
 	}
 	return raceResult, nil

@@ -8,7 +8,7 @@ import (
 	"runners-postgresql/models"
 	"runners-postgresql/services"
 
-	"github.com/gin-gonix/gin"
+	"github.com/gin-gonic/gin"
 )
 
 type ResultsController struct {

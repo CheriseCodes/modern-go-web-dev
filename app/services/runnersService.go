@@ -5,11 +5,12 @@ import (
 	"runners-postgresql/models"
 	"runners-postgresql/repositories"
 	"strconv"
+	"time"
 )
 
 type RunnersService struct {
-	runnersRepository    *repositories.runnersRepository
-	NewResultsRepository *repositories.ResultsRepository
+	runnersRepository *repositories.RunnersRepository
+	resultsRepository *repositories.ResultsRepository
 }
 
 func NewRunnersService(
@@ -17,24 +18,28 @@ func NewRunnersService(
 	resultsRepository *repositories.ResultsRepository) *RunnersService {
 	return &RunnersService{
 		runnersRepository: runnersRepository,
-		resultsRepository: resultsRepository
+		resultsRepository: resultsRepository,
 	}
 }
 
-func (fs RunnersService) CreateRunner(
-	runner *models.Runner
+func (rs RunnersService) CreateRunner(
+	runner *models.Runner,
 ) (*models.Runner, *models.ResponseError) {
-	// TODO
+	responseErr := validateRunner(runner)
+	if responseErr != nil {
+		return nil, responseErr
+	}
+	return rs.runnersRepository.CreateRunner(runner)
 }
 
 func (rs RunnersService) UpdateRunner(
-	runner *models.Runner
+	runner *models.Runner,
 ) *models.ResponseError {
 	responseErr := validateRunnerId(runner.ID)
 	if responseErr != nil {
 		return responseErr
 	}
-	responseErr := validateRunner(runner)
+	responseErr = validateRunner(runner)
 	if responseErr != nil {
 		return responseErr
 	}
@@ -42,7 +47,7 @@ func (rs RunnersService) UpdateRunner(
 }
 
 func (rs RunnersService) DeleteRunner(
-	runnerId string
+	runnerId string,
 ) *models.ResponseError {
 	responseErr := validateRunnerId(runnerId)
 	if responseErr != nil {
@@ -52,7 +57,7 @@ func (rs RunnersService) DeleteRunner(
 }
 
 func (rs RunnersService) GetRunner(
-	runnerId string
+	runnerId string,
 ) (*models.Runner, *models.ResponseError) {
 	responseErr := validateRunnerId(runnerId)
 	if responseErr != nil {
@@ -74,7 +79,7 @@ func (rs RunnersService) GetRunnersBatch(country string, year string) ([]*models
 	if country != "" && year != "" {
 		return nil, &models.ResponseError{
 			Message: "Only one parameter can be passed",
-			Status: http.StatusBadRequest,
+			Status:  http.StatusBadRequest,
 		}
 	}
 	// get the top 10 runners from one country
@@ -85,16 +90,16 @@ func (rs RunnersService) GetRunnersBatch(country string, year string) ([]*models
 	if year != "" {
 		intYear, err := strconv.Atoi(year)
 		if err != nil {
-			return &models.ResponseError{
+			return nil, &models.ResponseError{
 				Message: "Invalid year",
-				Status: http.StatusBadRequest,
+				Status:  http.StatusBadRequest,
 			}
 		}
 		currentYear := time.Now().Year()
 		if intYear < 0 || intYear > currentYear {
-			return &models.ResponseError{
+			return nil, &models.ResponseError{
 				Message: "Invalid year",
-				Status: http.StatusBadRequest,
+				Status:  http.StatusBadRequest,
 			}
 		}
 		return rs.runnersRepository.GetRunnersByYear(intYear)
@@ -104,32 +109,32 @@ func (rs RunnersService) GetRunnersBatch(country string, year string) ([]*models
 }
 
 func validateRunner(
-	runner *models.Runner
+	runner *models.Runner,
 ) *models.ResponseError {
-    // validate name
+	// validate name
 	if runner.FirstName == "" {
 		return &models.ResponseError{
 			Message: "Invalid first name",
-			Status: http.StatusBadRequest
+			Status:  http.StatusBadRequest,
 		}
-	}  
+	}
 	if runner.LastName == "" {
 		return &models.ResponseError{
 			Message: "Invalid last name",
-			Status: http.StatusBadRequest
+			Status:  http.StatusBadRequest,
 		}
 	}
 	// validate 16 < age < 125
 	if runner.Age <= 16 || runner.Age > 125 {
 		return &models.ResponseError{
 			Message: "Invalid age",
-			Status: http.StatusBadRequest
+			Status:  http.StatusBadRequest,
 		}
 	}
 	if runner.Country == "" {
 		return &models.ResponseError{
 			Message: "Invalid country",
-			Status: http.StatusBadRequest
+			Status:  http.StatusBadRequest,
 		}
 	}
 	return nil
@@ -139,17 +144,8 @@ func validateRunnerId(runnerId string) *models.ResponseError {
 	if runnerId == "" {
 		return &models.ResponseError{
 			Message: "Invalid runner ID",
-			Status: http.StatusBadRequest
+			Status:  http.StatusBadRequest,
 		}
 	}
 	return nil
 }
-
-func CreateRunner(runner *models.Runner) (*models.Runner, *models.ResponseError) {
-	responseErr := validateRunner(runner)
-	if responseErr != nil {
-		return nil, responseErr
-	}
-	return rs.runnersRepository.CreateRunner(runner)
-}
-

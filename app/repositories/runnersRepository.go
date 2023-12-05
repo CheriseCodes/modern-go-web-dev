@@ -64,7 +64,7 @@ func (rr RunnersRepository) UpdateRunner(runner *models.Runner) *models.Response
 			WHERE id = $5`
 	res, err := rr.dbHandler.Exec(query, runner.FirstName, runner.LastName, runner.Age, runner.Country, runner.ID)
 	if err != nil {
-		return &models.ResonseError{
+		return &models.ResponseError{
 			Message: err.Error(),
 			Status:  http.StatusInternalServerError,
 		}
@@ -77,7 +77,7 @@ func (rr RunnersRepository) UpdateRunner(runner *models.Runner) *models.Response
 		}
 	}
 	if rowsAffected == 0 {
-		return &models.ResonseError{
+		return &models.ResponseError{
 			Message: "Runner not found",
 			Status:  http.StatusNotFound,
 		}
@@ -94,7 +94,7 @@ func (rr RunnersRepository) UpdateRunnerResults(runner *models.Runner) *models.R
 		WHERE id = $3`
 	_, err := rr.transaction.Exec(query, runner.PersonalBest, runner.SeasonBest, runner.ID)
 	if err != nil {
-		return &models.ResonseError{
+		return &models.ResponseError{
 			Message: err.Error(),
 			Status:  http.StatusInternalServerError,
 		}
@@ -123,7 +123,7 @@ func (rr RunnersRepository) DeleteRunner(runnerId string) *models.ResponseError 
 		}
 	}
 	if rowsAffected == 0 {
-		return &models.ResonseError{
+		return &models.ResponseError{
 			Message: "Runner not found",
 			Status:  http.StatusNotFound,
 		}
@@ -139,7 +139,7 @@ func (rr RunnersRepository) GetRunner(runnerId string) (*models.Runner, *models.
 	`
 	rows, err := rr.dbHandler.Query(query, runnerId)
 	if err != nil {
-		return &models.ResponseError{
+		return nil, &models.ResponseError{
 			Message: err.Error(),
 			Status:  http.StatusInternalServerError,
 		}
@@ -224,7 +224,7 @@ func (rr RunnersRepository) GetAllRunners() ([]*models.Runner, *models.ResponseE
 	return runners, nil // return the runners list if successful
 }
 
-func (rr RunnersRepository) GetRunnersByCountry(country string) ([]*models.Runner, *models.ResonseError) {
+func (rr RunnersRepository) GetRunnersByCountry(country string) ([]*models.Runner, *models.ResponseError) {
 	query := `
 		SELECT *
 		FROM runners
@@ -303,7 +303,7 @@ func (rr RunnersRepository) GetRunnersByYear(year int) ([]*models.Runner, *model
 	for rows.Next() {
 		err := rows.Scan(&id, &firstName, &lastName, &age, &isActive, &country, &personalBest, &seasonBest)
 		if err != nil {
-			return nil, &models.ResonseError{
+			return nil, &models.ResponseError{
 				Message: err.Error(),
 				Status:  http.StatusInternalServerError,
 			}

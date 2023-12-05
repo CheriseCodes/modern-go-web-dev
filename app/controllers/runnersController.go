@@ -8,7 +8,7 @@ import (
 	"runners-postgresql/models"
 	"runners-postgresql/services"
 
-	"github.com/gin-gonix/gin"
+	"github.com/gin-gonic/gin"
 )
 
 type RunnersController struct {
@@ -53,7 +53,7 @@ func (rh RunnersController) CreateRunner(ctx *gin.Context) {
 }
 
 func (rh RunnersController) UpdateRunner(ctx *gin.Context) {
-	body, err := io.ReadAll(ctx.Response.Body)
+	body, err := io.ReadAll(ctx.Request.Body)
 	if err != nil {
 		log.Println("Error while reading "+
 			"update runner request body", err)
