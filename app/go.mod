@@ -1,4 +1,4 @@
-module app
+module runners-postgresql
 
 go 1.21.3
 
