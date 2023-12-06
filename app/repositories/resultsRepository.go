@@ -17,10 +17,51 @@ func NewResultsRepository(dbHandler *sql.DB) *ResultsRepository {
 	}
 }
 
+func (rr ResultsRepository) GetResult(resultId string) (*models.Result, *models.ResponseError) {
+	query := `
+		SELECT *
+		FROM results
+		WHERE id = ?;
+	`
+	rows, err := rr.dbHandler.Query(query, resultId)
+	if err != nil {
+		return nil, &models.ResponseError{
+			Message: err.Error(),
+			Status:  http.StatusInternalServerError,
+		}
+	}
+	defer rows.Close()
+	var id, runnerId, raceResult, location string
+	var position, year int
+	for rows.Next() {
+		err := rows.Scan(&id, &runnerId, &raceResult, &location, &position, &year)
+		if err != nil {
+			return nil, &models.ResponseError{
+				Message: err.Error(),
+				Status:  http.StatusInternalServerError,
+			}
+		}
+	}
+	if rows.Err() != nil {
+		return nil, &models.ResponseError{
+			Message: err.Error(),
+			Status:  http.StatusInternalServerError,
+		}
+	}
+	return &models.Result{
+		ID:         id,
+		RunnerID:   runnerId,
+		RaceResult: raceResult,
+		Location:   location,
+		Position:   position,
+		Year:       year,
+	}, nil
+}
+
 func (rr ResultsRepository) CreateResult(result *models.Result) (*models.Result, *models.ResponseError) {
 	query := `
 		INSERT INTO results(runner_id, race_result, location, position, year)
-		VALUES ($1, $2, $3, $4, $5)
+		VALUES (?, ?, ?, ?, ?)
 		RETURNING id
 	`
 	rows, err := rr.transaction.Query(query, result.RunnerID, result.RaceResult, result.Location, result.Position, result.Year)
@@ -56,15 +97,15 @@ func (rr ResultsRepository) CreateResult(result *models.Result) (*models.Result,
 		Year:       result.Year,
 	}, nil
 }
-func (rr ResultsRepository) DeleteResult(resultId string) (*models.Result, *models.ResponseError) {
+func (rr ResultsRepository) DeleteResult(resultId string) *models.ResponseError {
 	query := `
 		DELETE FROM results
-		WHERE id = $1
+		WHERE id = ?
 		RETURNING runner_id, race_result, year
 	`
 	rows, err := rr.transaction.Query(query, resultId)
 	if err != nil {
-		return nil, &models.ResponseError{
+		return &models.ResponseError{
 			Message: err.Error(),
 			Status:  http.StatusInternalServerError,
 		}
@@ -75,30 +116,25 @@ func (rr ResultsRepository) DeleteResult(resultId string) (*models.Result, *mode
 	for rows.Next() {
 		err := rows.Scan(&runnerId, &raceResult, &year)
 		if err != nil {
-			return nil, &models.ResponseError{
+			return &models.ResponseError{
 				Message: err.Error(),
 				Status:  http.StatusInternalServerError,
 			}
 		}
 	}
 	if rows.Err() != nil {
-		return nil, &models.ResponseError{
+		return &models.ResponseError{
 			Message: err.Error(),
 			Status:  http.StatusInternalServerError,
 		}
 	}
-	return &models.Result{
-		ID:         resultId,
-		RunnerID:   runnerId,
-		RaceResult: raceResult,
-		Year:       year,
-	}, nil
+	return nil
 }
 func (rr ResultsRepository) GetAllRunnersResults(runnerId string) ([]*models.Result, *models.ResponseError) {
 	query := `
 		SELECT id, race_result, location, position, year
 		FROM results
-		WHERE runner_id = $1
+		WHERE runner_id = ?
 	`
 	rows, err := rr.dbHandler.Query(query, runnerId)
 	if err != nil {
@@ -141,7 +177,7 @@ func (rr ResultsRepository) GetSeasonBestResults(runnerId string, year int) (str
 	query := `
 		SELECT MIN(race_result)
 		FROM results
-		WHERE runner_id = $1 AND year = $2
+		WHERE runner_id = ? AND year = ?
 	`
 	rows, err := rr.dbHandler.Query(query, runnerId, year)
 	if err != nil {
@@ -174,7 +210,7 @@ func (rr ResultsRepository) GetPersonalBestResults(runnerId string) (string, *mo
 	query := `
 		SELECT MIN(race_result)
 		FROM results
-		WHERE runner_id = $1
+		WHERE runner_id = ?
 	`
 	rows, err := rr.dbHandler.Query(query, runnerId)
 	if err != nil {

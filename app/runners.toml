@@ -1,14 +1,11 @@
 ################################################################
 # Database configuration
-# Connection string is in Go pq driver format:
-# host=<host> port=<port> user=<databaseUser>
-# password=<databaseUserPassword> dbname=<databaseName>
 [database]
-connection_string = "host=localhost port=5432 user=postgres password=password dbname=runners_db sslmode=disable"
+connection_string = "root:root123@tcp(localhost:3306)/runners_db"
 max_idle_connections = 5
 max_open_connections = 20
 connection_max_lifetime = "60s"
-driver_name = "postgres"
+driver_name = "mysql"
 ################################################################
 # HTTP server configuration
 [http]

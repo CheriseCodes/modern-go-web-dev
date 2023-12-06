@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"runners-postgresql/models"
+	"strconv"
 )
 
 type RunnersRepository struct {
@@ -18,33 +19,23 @@ func NewRunnersRepository(dbHandler *sql.DB) *RunnersRepository {
 }
 
 func (rr RunnersRepository) CreateRunner(runner *models.Runner) (*models.Runner, *models.ResponseError) {
-	query := `INSERT INTO runners(first_name, last_name, age, country) VALUES ($1, $2, $3, $4) RETURNING id`
-	rows, err := rr.dbHandler.Query(query, runner.FirstName, runner.LastName, runner.Age, runner.Country)
+	query := `INSERT INTO runners(first_name, last_name, age, country) VALUES (?, ?, ?, ?)`
+	res, err := rr.dbHandler.Exec(query, runner.FirstName, runner.LastName, runner.Age, runner.Country)
 	if err != nil {
 		return nil, &models.ResponseError{
 			Message: err.Error(),
 			Status:  http.StatusInternalServerError,
 		}
 	}
-	defer rows.Close()
-	var runnerId string
-	for rows.Next() {
-		err := rows.Scan(&runnerId)
-		if err != nil {
-			return nil, &models.ResponseError{
-				Message: err.Error(),
-				Status:  http.StatusInternalServerError,
-			}
-		}
-	}
-	if rows.Err() != nil {
+	runnerId, err := res.LastInsertId()
+	if err != nil {
 		return nil, &models.ResponseError{
 			Message: err.Error(),
 			Status:  http.StatusInternalServerError,
 		}
 	}
 	return &models.Runner{
-		ID:        runnerId,
+		ID:        strconv.FormatInt(runnerId, 10),
 		FirstName: runner.FirstName,
 		LastName:  runner.LastName,
 		Age:       runner.Age,
@@ -57,11 +48,11 @@ func (rr RunnersRepository) UpdateRunner(runner *models.Runner) *models.Response
 	query := `
 			UPDATE runners 
 			SET
-			first_name = $1, 
-			last_name = $2,
-			age = $3,
-			country = $4,
-			WHERE id = $5`
+			first_name = ?, 
+			last_name = ?,
+			age = ?,
+			country = ?,
+			WHERE id = ?`
 	res, err := rr.dbHandler.Exec(query, runner.FirstName, runner.LastName, runner.Age, runner.Country, runner.ID)
 	if err != nil {
 		return &models.ResponseError{
@@ -89,9 +80,9 @@ func (rr RunnersRepository) UpdateRunnerResults(runner *models.Runner) *models.R
 	query := `
 		UPDATE runners
 		SET
-			personal_best = $1,
-			season_best = $2
-		WHERE id = $3`
+			personal_best = ?,
+			season_best = ?
+		WHERE id = ?`
 	_, err := rr.transaction.Exec(query, runner.PersonalBest, runner.SeasonBest, runner.ID)
 	if err != nil {
 		return &models.ResponseError{
@@ -106,7 +97,7 @@ func (rr RunnersRepository) DeleteRunner(runnerId string) *models.ResponseError 
 	query := `
 		UPDATE runners
 		SETis_active 'false'
-		WHERE id = $1
+		WHERE id = ?
 	`
 	res, err := rr.dbHandler.Exec(query, runnerId)
 	if err != nil {
@@ -135,7 +126,7 @@ func (rr RunnersRepository) GetRunner(runnerId string) (*models.Runner, *models.
 	query := `
 		SELECT *
 		FROM runners
-		WHERE id = $1
+		WHERE id = ?
 	`
 	rows, err := rr.dbHandler.Query(query, runnerId)
 	if err != nil {
@@ -228,7 +219,7 @@ func (rr RunnersRepository) GetRunnersByCountry(country string) ([]*models.Runne
 	query := `
 		SELECT *
 		FROM runners
-		WHERE country = $1 AND is_active = 'true'
+		WHERE country = ? AND is_active = 'TRUE'
 		ORDER BY personal_best
 		LIMIT 10
 	`
@@ -281,7 +272,7 @@ func (rr RunnersRepository) GetRunnersByYear(year int) ([]*models.Runner, *model
 		FROM runners INNER JOIN (
 			SELECT runner_id, MIN(race_result) as race_result
 			FROM results
-			WHERE year = $1
+			WHERE year = ?
 			GROUP BY runner_id) results
 		ON runners.id = results.runner_id
 		ORDER BY results.race_result

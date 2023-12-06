@@ -7,7 +7,7 @@ import (
 
 	"runners-postgresql/config"
 
-	_ "github.com/lib/pq"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 /*

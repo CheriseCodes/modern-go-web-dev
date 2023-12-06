@@ -140,7 +140,11 @@ func (rs ResultsService) DeleteResult(
 			Status:  http.StatusBadRequest,
 		}
 	}
-	result, responseErr := rs.resultsRepository.DeleteResult(resultId)
+	result, responseErr := rs.resultsRepository.GetResult(resultId)
+	if responseErr != nil {
+		return responseErr
+	}
+	responseErr = rs.resultsRepository.DeleteResult(resultId)
 	if responseErr != nil {
 		return responseErr
 	}
