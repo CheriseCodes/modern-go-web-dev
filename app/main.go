@@ -24,5 +24,4 @@ func main() {
 	log.Println("Initializing HTTP server")
 	httpServer := server.InitHttpServer(config, dbHandler)
 	httpServer.Start()
-
 }
