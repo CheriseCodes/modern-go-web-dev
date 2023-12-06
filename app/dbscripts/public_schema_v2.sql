@@ -1,3 +1,4 @@
+-- Best for write heavy workloads (removed duplicated season_best and personal_best)
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -17,8 +18,6 @@ CREATE TABLE runners (
     age integer,
     is_active boolean DEFAULT TRUE,
     country text NOT NULL,
-    personal_best interval,
-    season_best interval,
     CONSTRAINT runners_pk PRIMARY KEY (id)
 );
 
