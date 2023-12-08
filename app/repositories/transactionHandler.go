@@ -5,27 +5,27 @@ import (
 	"database/sql"
 )
 
-func BeginTransaction(runnersRepository *RunnersRepository, resultsRepository *ResultsRepository) error {
+func BeginTransaction(runnersRepository RunnersRepositoryInterface, resultsRepository ResultsRepositoryInterface) error {
 	ctx := context.Background()
-	transaction, err := resultsRepository.dbHandler.BeginTx(ctx, &sql.TxOptions{})
+	transaction, err := resultsRepository.GetHandler().BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
-	runnersRepository.transaction = transaction
-	resultsRepository.transaction = transaction
+	runnersRepository.SetTransaction(transaction)
+	resultsRepository.SetTransaction(transaction)
 	return nil
 }
 
-func RollbackTransaction(runnersRepository *RunnersRepository, resultsRepository *ResultsRepository) error {
-	transaction := runnersRepository.transaction
-	runnersRepository.transaction = nil
-	resultsRepository.transaction = nil
+func RollbackTransaction(runnersRepository RunnersRepositoryInterface, resultsRepository ResultsRepositoryInterface) error {
+	transaction := runnersRepository.GetTransaction()
+	runnersRepository.SetTransaction(nil)
+	resultsRepository.SetTransaction(nil)
 	return transaction.Rollback()
 }
 
-func CommitTransaction(runnersRepository *RunnersRepository, resultsRepository *ResultsRepository) error {
-	transaction := runnersRepository.transaction
-	runnersRepository.transaction = nil
-	resultsRepository.transaction = nil
+func CommitTransaction(runnersRepository RunnersRepositoryInterface, resultsRepository ResultsRepositoryInterface) error {
+	transaction := runnersRepository.GetTransaction()
+	runnersRepository.SetTransaction(nil)
+	resultsRepository.SetTransaction(nil)
 	return transaction.Commit()
 }

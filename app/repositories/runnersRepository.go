@@ -328,3 +328,15 @@ func (rr RunnersRepository) GetRunnersByYear(year int) ([]*models.Runner, *model
 	}
 	return runners, nil
 }
+
+func (rr RunnersRepository) SetTransaction(transaction *sql.Tx) {
+	rr.transaction = transaction
+}
+
+func (rr RunnersRepository) GetHandler() *sql.DB {
+	return rr.dbHandler
+}
+
+func (rr RunnersRepository) GetTransaction() *sql.Tx {
+	return rr.transaction
+}

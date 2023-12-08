@@ -9,13 +9,13 @@ import (
 )
 
 type RunnersService struct {
-	runnersRepository *repositories.RunnersRepository
-	resultsRepository *repositories.ResultsRepository
+	runnersRepository repositories.RunnersRepositoryInterface
+	resultsRepository repositories.ResultsRepositoryInterface
 }
 
 func NewRunnersService(
-	runnersRepository *repositories.RunnersRepository,
-	resultsRepository *repositories.ResultsRepository) *RunnersService {
+	runnersRepository repositories.RunnersRepositoryInterface,
+	resultsRepository repositories.ResultsRepositoryInterface) *RunnersService {
 	return &RunnersService{
 		runnersRepository: runnersRepository,
 		resultsRepository: resultsRepository,

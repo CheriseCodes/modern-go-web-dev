@@ -8,13 +8,13 @@ import (
 )
 
 type ResultsService struct {
-	resultsRepository *repositories.ResultsRepository
-	runnersRepository *repositories.RunnersRepository
+	resultsRepository repositories.ResultsRepositoryInterface
+	runnersRepository repositories.RunnersRepositoryInterface
 }
 
 func NewResultsService(
-	resultsRepository *repositories.ResultsRepository,
-	runnersRepository *repositories.RunnersRepository) *ResultsService {
+	resultsRepository repositories.ResultsRepositoryInterface,
+	runnersRepository repositories.RunnersRepositoryInterface) *ResultsService {
 	return &ResultsService{
 		resultsRepository: resultsRepository,
 		runnersRepository: runnersRepository,

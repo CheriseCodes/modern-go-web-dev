@@ -202,3 +202,15 @@ func (rr ResultsRepository) GetPersonalBestResults(runnerId string) (string, *mo
 	}
 	return raceResult, nil
 }
+
+func (rr ResultsRepository) SetTransaction(transaction *sql.Tx) {
+	rr.transaction = transaction
+}
+
+func (rr ResultsRepository) GetHandler() *sql.DB {
+	return rr.dbHandler
+}
+
+func (rr ResultsRepository) GetTransaction() *sql.Tx {
+	return rr.transaction
+}
