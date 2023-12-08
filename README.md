@@ -2,7 +2,7 @@
 Applications covered in the book "Modern Web Development with Go" ⭐️⭐️⭐️⭐️⭐️
 
 ## Branches
-**main:** following the primary postgresql implementation of the application
+**main:** follows the primary postgresql implementation of the application
 
 **dynamodb:** implements DynamoDB version of the application
 
