@@ -17,8 +17,10 @@ import (
 
 func initTestRouter(dbHandler *sql.DB) *gin.Engine {
 	runnersRepository := repositories.NewRunnersRepository(dbHandler)
+	usersRepository := repositories.NewUsersRepository(dbHandler)
 	runnersService := services.NewRunnersService(runnersRepository, nil)
-	runnersController := NewRunnersController(runnersService)
+	usersService := services.NewUsersService(usersRepository)
+	runnersController := NewRunnersController(runnersService, usersService)
 	router := gin.Default()
 	router.GET("/runner", runnersController.GetRunnersBatch)
 	return router
@@ -27,11 +29,14 @@ func initTestRouter(dbHandler *sql.DB) *gin.Engine {
 func TestGetRunnersResponse(t *testing.T) {
 	dbHandler, mock, _ := sqlmock.New()
 	defer dbHandler.Close()
+	columnsUsers := []string{"user_role"}
+	mock.ExpectQuery("SELECT user_role").WillReturnRows(sqlmock.NewRows(columnsUsers).AddRow("runner"))
 	columns := []string{"id", "first_name", "last_name", "age", "is_active", "country", "personal_best", "season_best"}
 	mock.ExpectQuery("SELECT *").WillReturnRows(sqlmock.NewRows(columns).AddRow("1", "John", "Smith", 30, true, "United States", "02:00:41", "02:13:13").AddRow("2", "Marijana", "Komatinovic", 30, true, "Serbia", "01:18:28", "01:18:28"))
 	router := initTestRouter(dbHandler)
 	request, _ := http.NewRequest("GET", "/runner", nil)
 	recorder := httptest.NewRecorder()
+	request.Header.Set("token", "token")
 	router.ServeHTTP(recorder, request)
 	assert.Equal(t, http.StatusOK, recorder.Result().StatusCode)
 	var runners []*models.Runner
