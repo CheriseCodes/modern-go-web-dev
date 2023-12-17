@@ -1,13 +1,19 @@
 package controllers
 
-import "log"
+import (
+	"log"
+	"net/http"
+	"runners-postgresql/services"
+
+	"github.com/gin-gonic/gin"
+)
 
 type UsersController struct {
 	usersService *services.UsersService
 }
 
 func NewUsersController(
-	usersService *services.UsersService
+	usersService *services.UsersService,
 ) *UsersController {
 	return &UsersController{
 		usersService: usersService,
@@ -38,5 +44,3 @@ func (uc UsersController) Logout(ctx *gin.Context) {
 	}
 	ctx.Status(http.StatusNoContent)
 }
-
-
