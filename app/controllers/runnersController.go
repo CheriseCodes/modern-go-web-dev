@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const ROLE_ADMIN = "admin"
-const ROLE_RUNNER = "runner"
+// const ROLE_ADMIN = "admin"
+// const ROLE_RUNNER = "runner"
 
 type RunnersController struct {
 	runnersService *services.RunnersService
@@ -113,7 +113,7 @@ func (rh RunnersController) DeleteRunner(ctx *gin.Context) {
 		return
 	}
 	runnerId := ctx.Param("id")
-	responseErr := rh.runnersService.DeleteRunner(runnerId)
+	responseErr = rh.runnersService.DeleteRunner(runnerId)
 	if responseErr != nil {
 		ctx.AbortWithStatusJSON(responseErr.Status, responseErr)
 		return

@@ -26,8 +26,8 @@ func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
 	runnersService := services.NewRunnersService(runnersRepository, resultRepository)
 	resultsService := services.NewResultsService(resultRepository, runnersRepository)
 	usersService := services.NewUsersService(usersRepository)
-	runnersController := controllers.NewRunnersController(runnersService)
-	resultsController := controllers.NewResultsController(resultsService)
+	runnersController := controllers.NewRunnersController(runnersService, usersService)
+	resultsController := controllers.NewResultsController(resultsService, usersService)
 	usersController := controllers.NewUsersController(usersService)
 
 	router := gin.Default()

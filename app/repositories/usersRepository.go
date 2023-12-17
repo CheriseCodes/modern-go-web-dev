@@ -70,7 +70,7 @@ func (ur UsersRepository) GetUserRole(accessToken string) (string, *models.Respo
 	}
 	if rows.Err() != nil {
 		return "", &models.ResponseError{
-			Message: rows.Err(),
+			Message: err.Error(),
 			Status:  http.StatusInternalServerError,
 		}
 	}

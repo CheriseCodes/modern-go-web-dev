@@ -2,10 +2,9 @@ package services
 
 import (
 	"encoding/base64"
-	"fmt"
+	"net/http"
 	"runners-postgresql/models"
 	"runners-postgresql/repositories"
-	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,10 +14,10 @@ type UsersService struct {
 }
 
 func NewUsersService(
-	usersRepository *repositories.UsersRepository
+	usersRepository *repositories.UsersRepository,
 ) *UsersService {
 	return &UsersService{
-		usersRepository: usersRepository
+		usersRepository: usersRepository,
 	}
 }
 
@@ -26,11 +25,11 @@ func (us UsersService) Login(username string, password string) (string, *models.
 	if username == "" || password == "" {
 		return "", &models.ResponseError{
 			Message: "Invalid username or password",
-			Status: http.StatusBadRequest,
+			Status:  http.StatusBadRequest,
 		}
 	}
 	id, responseErr := us.usersRepository.LoginUser(
-		username, password
+		username, password,
 	)
 	if responseErr != nil {
 		return "", responseErr
@@ -38,7 +37,7 @@ func (us UsersService) Login(username string, password string) (string, *models.
 	if id == "" {
 		return "", &models.ResponseError{
 			Message: "Login failed",
-			Status: http.StatusUnauthorized,
+			Status:  http.StatusUnauthorized,
 		}
 	}
 	accessToken, responseErr := generateAccessToken(username)
@@ -49,11 +48,11 @@ func (us UsersService) Login(username string, password string) (string, *models.
 	return accessToken, nil
 }
 
-func (us UsersService) Logout(accessToken string) *models.ResponseError  {
+func (us UsersService) Logout(accessToken string) *models.ResponseError {
 	if accessToken == "" {
 		return &models.ResponseError{
 			Message: "Invalid access token",
-			Status: http.StatusBadRequest,
+			Status:  http.StatusBadRequest,
 		}
 	}
 	return us.usersRepository.RemoveAccessToken(accessToken)
@@ -63,7 +62,7 @@ func (us UsersService) AuthorizeUser(accessToken string, expectedRoles []string)
 	if accessToken == "" {
 		return false, &models.ResponseError{
 			Message: "Invalid access token",
-			Status: http.StatusBadRequest,
+			Status:  http.StatusBadRequest,
 		}
 	}
 	role, responseErr := us.usersRepository.GetUserRole(accessToken)
@@ -73,7 +72,7 @@ func (us UsersService) AuthorizeUser(accessToken string, expectedRoles []string)
 	if role == "" {
 		return false, &models.ResponseError{
 			Message: "Failed to authorize user",
-			Status: http.StatusUnauthorized,
+			Status:  http.StatusUnauthorized,
 		}
 	}
 	for _, expectedRole := range expectedRoles {
@@ -86,12 +85,12 @@ func (us UsersService) AuthorizeUser(accessToken string, expectedRoles []string)
 
 func generateAccessToken(username string) (string, *models.ResponseError) {
 	hash, err := bcrypt.GenerateFromPassword(
-		[]byte(username), bcrypt.DefaultCost
+		[]byte(username), bcrypt.DefaultCost,
 	)
 	if err != nil {
 		return "", &models.ResponseError{
 			Message: "Failed to generate token",
-			Status: http.StatusInternalServerError,
+			Status:  http.StatusInternalServerError,
 		}
 	}
 	return base64.StdEncoding.EncodeToString(hash), nil
