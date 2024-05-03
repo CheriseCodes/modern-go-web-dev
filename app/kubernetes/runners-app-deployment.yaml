@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: runners-app
+  namespace: runners-space
 spec:
   selector:
     matchLabels:
@@ -13,12 +14,11 @@ spec:
         app: runners-app
     spec:
       containers:
-      - image: runners-app:latest
-        name: runners-app
-	imagePullPolicy: Never
-        ports:
-	- containerPort: 8080
-	env:
-	- name: ENV
-	  value: "k8s"
-      
+       - name: runners-app
+         image: runners-app:latest
+         imagePullPolicy: Never
+         ports:
+          - containerPort: 8080
+         env:
+         - name: ENV
+           value: "k8s"   
