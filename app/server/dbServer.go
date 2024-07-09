@@ -3,7 +3,6 @@ package server
 import (
 	"database/sql"
 	"log"
-
 	"github.com/spf13/viper"
 )
 
