@@ -1,5 +1,5 @@
 build:
-	go build -o runners_app main.go
+	go build -o runners-app main.go
 
 test:
 	go test -v
@@ -18,5 +18,5 @@ view-coverage:
 	go tool cover -html=coverage.out
 
 clean:
-	rm runners_app
+	rm runners-app &2>1
 	rm coverage.out
