@@ -11,7 +11,7 @@ run:
 	go run main.go
 
 docker-run:
-	docker run --name runners-app -p 8080:8080 --mount type=bind,src=./runners.toml,dst=/app/runners.toml runners-app:latest
+	docker run --name runners-app -p 8080:8080 --mount type=bind,src=./runners.toml,dst=/app/runners.toml,readonly runners-app:latest
 
 run-sample:
 	cp sample-config-runners.toml runners.toml
