@@ -1,6 +1,9 @@
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
+# Notes
+notes.txt
+
 # Configurations
 runners.toml
 
@@ -24,7 +27,7 @@ runners.toml
 go.work
 
 # Go binaries
-runners_app
+runners-app
 
 # TERRAFORM
 
