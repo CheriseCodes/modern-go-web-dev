@@ -6,6 +6,7 @@ notes.txt
 
 # Configurations
 runners.toml
+.env
 
 # Binaries for programs and plugins
 *.exe
