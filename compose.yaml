@@ -1,11 +1,11 @@
 # For development purposes only, the production version is ran in Kubernetes (GKE)
-version: "3.8"
 name: "custom-modern-go-web-dev"
 services:
   runners-app: 
     build: ./app
     ports:
       - "8080:8080"
+      - "9000:9000"
 # # Run Gin in release mode (production)
 #    environment:
 #      GIN_MODE: release
@@ -17,9 +17,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
- 
   db: 
-    image: postgres
+    image: postgres:14-alpine
     restart: always
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -39,6 +38,13 @@ services:
     restart: always
     ports:
       - "8000:8080"
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml 
+    command: --config.file=/etc/prometheus/prometheus.yml
 
 volumes:
   runners-db-postgres-volume:
