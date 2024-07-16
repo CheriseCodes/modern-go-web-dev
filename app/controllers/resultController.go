@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"runners-postgresql/metrics"
 	"runners-postgresql/models"
 	"runners-postgresql/services"
 
@@ -20,6 +21,7 @@ type ResultsController struct {
 }
 
 func NewResultsController(resultsService *services.ResultsService, usersService *services.UsersService) *ResultsController {
+	metrics.HttpRequestsCounter.Inc()
 	return &ResultsController{
 		resultsService: resultsService,
 		usersService:   usersService,
