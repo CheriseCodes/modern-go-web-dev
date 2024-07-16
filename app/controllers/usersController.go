@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"runners-postgresql/metrics"
 	"runners-postgresql/services"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ type UsersController struct {
 func NewUsersController(
 	usersService *services.UsersService,
 ) *UsersController {
+	metrics.HttpRequestsCounter.Inc()
 	return &UsersController{
 		usersService: usersService,
 	}
